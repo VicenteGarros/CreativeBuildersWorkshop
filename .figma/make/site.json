@@ -1,0 +1,10 @@
+{
+  "description": "Controle finanças pessoais em um só lugar: registre gastos, acompanhe cartões e metas e tenha mais clareza para planejar grandes conquistas.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

@@ -1,0 +1,105 @@
+// ==============================================================================
+// PRISMA SCHEMA - ESKGO FINANCE APP
+// ==============================================================================
+// Modelo completo documentado para PostgreSQL e Supabase
+// Conexão via Direct URL ou Connection Pooling (PgBouncer/Supavisor)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ------------------------------------------------------------------------------
+// PERFIL DO USUÁRIO & PREFERÊNCIAS
+// ------------------------------------------------------------------------------
+model Profile {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String?  @unique @map("user_id") @db.Uuid
+  email             String?  @unique
+  fullName          String   @default("Lucas Silva") @map("full_name")
+  avatarUrl         String?  @map("avatar_url")
+  hideBalance       Boolean  @default(false) @map("hide_balance")
+  notifyDueDates    Boolean  @default(true) @map("notify_due_dates")
+  aiInsightsEnabled Boolean  @default(true) @map("ai_insights_enabled")
+  monthlyBudget     Decimal  @default(3200.00) @map("monthly_budget") @db.Decimal(12, 2)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  transactions Transaction[]
+  cards        Card[]
+  goals        Goal[]
+
+  @@map("profiles")
+}
+
+// ------------------------------------------------------------------------------
+// TRANSAÇÕES (GASTOS E ENTRADAS)
+// ------------------------------------------------------------------------------
+model Transaction {
+  id            BigInt   @id @default(autoincrement())
+  userId        String?  @map("user_id") @db.Uuid
+  name          String
+  category      String
+  date          String
+  amount        Decimal  @db.Decimal(12, 2)
+  icon          String?  @default("cfe5b.svg")
+  incoming      Boolean  @default(false)
+  paymentMethod String?  @map("payment_method")
+  installments  String?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  profile Profile? @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([createdAt(sort: Desc)], name: "idx_transactions_created_at")
+  @@index([category], name: "idx_transactions_category")
+  @@map("transactions")
+}
+
+// ------------------------------------------------------------------------------
+// CARTÕES DE CRÉDITO & DÉBITO
+// ------------------------------------------------------------------------------
+model Card {
+  id          String   @id
+  userId      String?  @map("user_id") @db.Uuid
+  name        String
+  lastDigits  String   @map("last_digits")
+  bill        Decimal  @default(0) @db.Decimal(12, 2)
+  limitAmount Decimal  @map("limit_amount") @db.Decimal(12, 2)
+  closingDay  Int      @map("closing_day")
+  dueDay      Int      @map("due_day")
+  dueText     String?  @map("due_text")
+  className   String?  @default("lime-card") @map("class_name")
+  cardholder  String?  @default("LUCAS SILVA")
+  brand       String?  @default("Mastercard Black")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  profile Profile? @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([createdAt(sort: Asc)], name: "idx_cards_created_at")
+  @@map("cards")
+}
+
+// ------------------------------------------------------------------------------
+// METAS E OBJETIVOS FINANCEIROS
+// ------------------------------------------------------------------------------
+model Goal {
+  id            String   @id
+  userId        String?  @map("user_id") @db.Uuid
+  title         String
+  targetAmount  Decimal  @map("target_amount") @db.Decimal(12, 2)
+  currentAmount Decimal  @default(0) @map("current_amount") @db.Decimal(12, 2)
+  category      String
+  targetDate    String   @map("target_date")
+  isLongTerm    Boolean  @default(false) @map("is_long_term")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  profile Profile? @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([createdAt(sort: Asc)], name: "idx_goals_created_at")
+  @@map("goals")
+}
