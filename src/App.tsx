@@ -323,17 +323,6 @@ function AuthScreen({
           <button className="primary-button auth-submit-btn" type="submit" disabled={isLoading}>
             {isLoading ? 'Autenticando...' : isLogin ? 'Entrar no Eskgo →' : 'Criar minha conta →'}
           </button>
-
-          {isLogin && (
-            <div className="auth-notice">
-              🛡️ <strong>Usuário Administrador de Teste:</strong>
-              <br />
-              <strong>E-mail:</strong> {ADMIN_CREDENTIALS.email} | <strong>Senha:</strong> {ADMIN_CREDENTIALS.password}
-              <br />
-              <small>Outros usuários devem se cadastrar na opção abaixo.</small>
-            </div>
-          )}
-
           <div className="auth-switch">
             {isLogin ? (
               <p>
@@ -1272,8 +1261,8 @@ function AccountSheet({
 // COMPONENTE PRINCIPAL (APP)
 // ==========================================
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<AppUser | null>(() => getCurrentSessionUser())
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!getCurrentSessionUser())
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [authMode, setAuthMode] = useState<AuthMode>('login')
   const [view, setView] = useState<View>('home')
   const [hidden, setHidden] = useState(false)
